@@ -10,6 +10,7 @@ PIX_PER_UNIT = 0.1
 tile_size = 30
 screen_w = 1200
 screen_h = 880 
+GRAVITATIONAL_CONSTANT = 6.7
 
 screen = pygame.display.set_mode((screen_w, screen_h))
 manager = ui.UIManager((screen_w, screen_h))
@@ -54,8 +55,11 @@ class Body:
              self.pos.astype(int),
             int(self.radius)
         )
-    def update(self):
-        pass
+        
+    def update(self, dt):
+        self.vel = self.vel + self.accel
+        self.pos = self.pos + dt
+        
 class Sattelite:
     def __init__(self, accel):
         self.accel = accel
@@ -155,9 +159,13 @@ while running:
             if m_body == sub_body:
                 continue
             diff = m_body.pos - sub_body.pos
-            dist = np.linalg(diff)
+            dist = np.linalg.norm(diff)
             
-            total_mass  = m_body.mass + sub_body.mass
+            
+            total_mass  =m_body.mass + sub_body.mass
+            
+            force_magn = GRAVITATIONAL_CONSTANT * (total_mass / (dist * dist))
+            force_vect = force_magn * (diff / dist)
             
             
 
