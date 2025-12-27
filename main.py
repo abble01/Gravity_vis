@@ -30,24 +30,24 @@ radius_input.set_allowed_characters("numbers")
 
 UILabel(relative_rect=pygame.Rect((10, 80), (100, 30)), text="Velocity X:", manager=manager)
 vel_x_input = UITextEntryLine(relative_rect=pygame.Rect((120, 80), (100, 30)), manager=manager)
-vel_x_input.set_allowed_characters("numbers")
+#vel_x_input.set_allowed_characters("numbers")
 
 UILabel(relative_rect=pygame.Rect((10, 110), (100, 30)), text="Velocity Y:", manager=manager)
 vel_y_input = UITextEntryLine(relative_rect=pygame.Rect((120, 110), (100, 30)), manager=manager)
-vel_y_input.set_allowed_characters("numbers")
+#vel_y_input.set_allowed_characters("numbers")
 
 
 
 
 #Classes
 class Body:
-    def __init__(self, mass : float, radius : float, vel: float, pos: np.array, accel: np.array):
+    def __init__(self, mass : float, radius : float, vel: float, pos: np.array, accel: np.array, lifetime):
         self.mass = mass
         self.radius = radius
         self.pos = np.array(pos, dtype=float)
         self.vel = np.array(vel, float)  
         self.accel = np.zeros(2, float)
-        
+        self.lifetime = lifetime
     def draw(self, screen):
         pygame.draw.circle(
             screen,
@@ -57,8 +57,8 @@ class Body:
         )
         
     def update(self, dt):
-        self.vel = self.vel + self.accel
-        self.pos = self.pos + dt
+        self.vel = self.vel + (self.accel * dt)
+        self.pos = self.pos + (self.vel * dt)
         
 class Sattelite:
     def __init__(self, accel):
@@ -124,7 +124,8 @@ while running:
                                 t_radius,
                                 t_vel,
                                 pygame.mouse.get_pos(),
-                                t_accel
+                                t_accel,
+                                0
                                 )
                 bodies.append(new_body)
                 
@@ -154,11 +155,12 @@ while running:
         )
         
         # F = G((m_1 + m_2) / r^2) 
+        # a = f/m
     for m_body in bodies:
         for sub_body in bodies:
             if m_body == sub_body:
                 continue
-            diff = m_body.pos - sub_body.pos
+            diff = sub_body.pos - m_body.pos
             dist = np.linalg.norm(diff)
             
             
@@ -166,12 +168,14 @@ while running:
             
             force_magn = GRAVITATIONAL_CONSTANT * (total_mass / (dist * dist))
             force_vect = force_magn * (diff / dist)
-            
+            #print(force_magn)
+            m_body.accel += (force_vect / m_body.mass)
             
 
     for body in bodies:
         body.draw(screen)
-                
+        body.update(time_delta)
+        body.lifetime += (1 / time_delta)
     manager.update(time_delta)
     manager.draw_ui(screen)
     pygame.display.update()
