@@ -7,6 +7,7 @@ pygame.init()
 
 # ~~ Variables
 PIX_PER_UNIT = 0.1
+softener = 0.01
 tile_size = 30
 screen_w = 1200
 screen_h = 880 
@@ -154,20 +155,20 @@ while running:
             5
         )
         
-        # F = G((m_1 + m_2) / r^2) 
+        # F = G((m_1 * m_2) / r^2) 
         # a = f/m
     for m_body in bodies:
         for sub_body in bodies:
             if m_body == sub_body:
                 continue
             diff = sub_body.pos - m_body.pos
-            dist = np.linalg.norm(diff)
+            r = np.dot(diff,diff)
             
             
-            total_mass  =m_body.mass + sub_body.mass
+            mass_prod  = m_body.mass * sub_body.mass
+            denominator = (r + softener**2)**1.5
             
-            force_magn = GRAVITATIONAL_CONSTANT * (total_mass / (dist * dist))
-            force_vect = force_magn * (diff / dist)
+            force_vect = (GRAVITATIONAL_CONSTANT * mass_prod * diff) / denominator
             #print(force_magn)
             m_body.accel += (force_vect / m_body.mass)
             
