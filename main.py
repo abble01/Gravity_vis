@@ -70,13 +70,13 @@ class Sattelite:
 
 # Buttons
 create_button = UIButton(
-    relative_rect=pygame.Rect((10, 160), (210, 40)),
+    relative_rect=pygame.Rect((10, 170), (210, 40)),
     text='Create Body',
     manager=manager
 )
 
 create_sattelite = UIButton(
-    relative_rect=pygame.Rect((10,200), (210, 40)),
+    relative_rect=pygame.Rect((10,210), (210, 40)),
     text="Create sattelite",
     manager=manager
 )
