@@ -16,11 +16,12 @@ GRAVITATIONAL_CONSTANT = 6.7
 screen = pygame.display.set_mode((screen_w, screen_h))
 manager = ui.UIManager((screen_w, screen_h))
 
-circle_texture = pygame.image.load("texture.png").convert_alpha()
+
 # Formulas
 
 
 # UI
+UI_ELEMENTS = []
 UILabel(relative_rect=pygame.Rect((10, 10), (100, 30)), text="Mass:", manager=manager)
 mass_input = UITextEntryLine(relative_rect=pygame.Rect((120, 10), (100, 30)), manager=manager)
 mass_input.set_allowed_characters('numbers')
@@ -36,6 +37,7 @@ vel_x_input = UITextEntryLine(relative_rect=pygame.Rect((120, 80), (100, 30)), m
 UILabel(relative_rect=pygame.Rect((10, 110), (100, 30)), text="Velocity Y:", manager=manager)
 vel_y_input = UITextEntryLine(relative_rect=pygame.Rect((120, 110), (100, 30)), manager=manager)
 #vel_y_input.set_allowed_characters("numbers")
+clear_button = UIButton(relative_rect=pygame.Rect((10,140), (100,30)), text="CLEAR FIELDS", manager=manager)
 
 
 
@@ -52,7 +54,7 @@ class Body:
     def draw(self, screen):
         pygame.draw.circle(
             screen,
-            (80,80,80),
+            (80,80,80) if self.mass < 999999999 else (0,0,0) ,
              self.pos.astype(int),
             int(self.radius)
         )
@@ -86,15 +88,15 @@ grid = (30,30,30)
 
 
 #Functions 
-def draw_grid(tile_size):
+def draw_grid(tile_size): # add bodies parameter soon ( curvature effect gravity)
+    
     screen.fill(bg)
     for x in range(tile_size, screen_w, tile_size):
         pygame.draw.line(screen, grid, (x, 0), (x, screen_h), 2)
     for y in range(tile_size, screen_h, tile_size):
         pygame.draw.line(screen, grid, (0,y), (screen_w, y), 2)
-    
-    
-    
+
+
 
 # SIM state
 bodies = []
@@ -129,6 +131,7 @@ while running:
                                 0
                                 )
                 bodies.append(new_body)
+
                 
                 placing = False
         
@@ -141,10 +144,16 @@ while running:
                     t_vel = np.array([float(vel_x_input.get_text()), float(vel_y_input.get_text())])
                     
                 except ValueError:
-                    print("Fields need numbers")
+                    print("Fields need numbers")  
                     continue
                 placing = True
                 
+        if event.type == ui.UI_BUTTON_PRESSED:
+            if event.ui_element == clear_button:
+                mass_input.clear()
+                vel_x_input.clear()
+                vel_y_input.clear()
+                radius_input.clear()
     if placing:
         mouse_pos = pygame.mouse.get_pos()
         pygame.draw.circle(
